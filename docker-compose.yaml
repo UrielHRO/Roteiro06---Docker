@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # --- PAR 1: Ubuntu + PostgreSQL ---
+  ubuntu_server:
+    image: ubuntu:latest
+    container_name: server_ubuntu
+    command: tail -f /dev/null # Mantém o contêiner rodando
+    networks:
+      - rede_par_1
+    depends_on:
+      - db_postgres
+
+  db_postgres:
+    image: postgres:13
+    container_name: database_postgres
+    environment:
+      POSTGRES_PASSWORD: senha_segura
+    volumes:
+      - volume_postgres:/var/lib/postgresql/data
+    networks:
+      - rede_par_1
+
+  # --- PAR 2: CentOS + Redis ---
+  centos_server:
+    image: centos:7
+    container_name: server_centos
+    command: tail -f /dev/null # Mantém o contêiner rodando
+    networks:
+      - rede_par_2
+    depends_on:
+      - db_redis
+
+  db_redis:
+    image: redis:latest
+    container_name: database_redis
+    volumes:
+      - volume_redis:/data
+    networks:
+      - rede_par_2
+
+# Configuração de redes isoladas
+networks:
+  rede_par_1:
+    driver: bridge
+  rede_par_2:
+    driver: bridge
+
+# Configuração de volumes para persistência
+volumes:
+  volume_postgres:
+  volume_redis:
